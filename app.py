@@ -34,7 +34,7 @@ async def download_video(url):
         os.makedirs("downloads", exist_ok=True)
         
         ydl_opts = {
-            'format': 'best[height<=720]',
+            'format': 'best',
             'outtmpl': 'downloads/%(title)s.%(ext)s',
             'quiet': True,
             'no_warnings': True,
