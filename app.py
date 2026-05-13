@@ -2,6 +2,8 @@ import asyncio
 import os
 import re
 import random
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 import yt_dlp
@@ -83,17 +85,40 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     print(f"❌ Ошибка: {context.error}")
 
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+    
+    def log_message(self, format, *args):
+        pass 
+
+def run_webserver():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+    print(f"🌐 Веб-сервер запущен на порту {port} (для Render)")
+    server.serve_forever()
+
+
 def main():
     os.makedirs("downloads", exist_ok=True)
     
-    print("Бот запущен на сервере!")
+    print("🤖 Бот запускается...")
     print(f"Токен загружен: {'Да' if BOT_TOKEN else 'Нет'}")
+    
+   
+    web_thread = threading.Thread(target=run_webserver, daemon=True)
+    web_thread.start()
+    
     
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_error_handler(error_handler)
     
-    print("Запускаем polling...")
+    print("🚀 Бот запущен на сервере!")
     app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
