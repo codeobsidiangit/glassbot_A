@@ -84,10 +84,10 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print("⚠️ Тайм-аут соединения с Telegram, бот продолжает работу...")
             return
             
-elif "Conflict" in error_str or "terminated by other getUpdates" in error_str:
-            
+        if "Conflict" in error_str or "terminated" in error_str:
             print("⚠️ Конфликт экземпляров бота (игнорируем, бот работает)")
             return
+            
     print(f"❌ Ошибка: {context.error}")
 
 
